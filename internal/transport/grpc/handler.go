@@ -10,6 +10,10 @@ type RateHandler struct {
 	pb.UnimplementedRateServiceServer
 }
 
+func NewRateHandler() *RateHandler {
+	return &RateHandler{}
+}
+
 func (h *RateHandler) GetRates(ctx context.Context, req *pb.Empty) (*pb.RateResponse, error) {
 	rate, err := service.FetchRates()
 	if err != nil {

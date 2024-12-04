@@ -1,7 +1,7 @@
 package domain
 
 type Rate struct {
-	Ask       float64 `json:"ask"`
-	Bid       float64 `json:"bid"`
+	Ask       float32 `json:"ask"`
+	Bid       float32 `json:"bid"`
 	Timestamp int64   `json:"timestamp"`
 }

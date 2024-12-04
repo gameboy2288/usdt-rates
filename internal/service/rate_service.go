@@ -31,8 +31,8 @@ func FetchRates() (*domain.Rate, error) {
 	bid, _ := strconv.ParseFloat(bidPrice, 64)
 
 	return &domain.Rate{
-		Ask:       ask,
-		Bid:       bid,
+		Ask:       float32(ask),
+		Bid:       float32(bid),
 		Timestamp: time.Now().Unix(),
 	}, nil
 }

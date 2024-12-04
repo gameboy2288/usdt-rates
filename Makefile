@@ -5,7 +5,7 @@ test:
 	go test ./...
 
 docker-build:
-	docker build -t usdt-rates .
+	docker-compose up --build
 
 run:
 	go run cmd/app/main.go

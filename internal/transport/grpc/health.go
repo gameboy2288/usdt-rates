@@ -11,6 +11,10 @@ type HealthHandler struct {
 	pb.UnimplementedHealthServer
 }
 
+func NewHealthHandler() *HealthHandler {
+	return &HealthHandler{}
+}
+
 // HealthCheck проверяет состояние сервиса
 func (h *HealthHandler) HealthCheck(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
 	return &pb.HealthCheckResponse{

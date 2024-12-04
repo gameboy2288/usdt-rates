@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package rate;
+option go_package = "proto;rate";
 
 service RateService {
   rpc GetRates (Empty) returns (RateResponse);

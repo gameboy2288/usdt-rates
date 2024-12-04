@@ -3,15 +3,18 @@ package main
 import (
 	"context"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	"usdt-rates/internal/transport/grpc"
+	myGrpc "usdt-rates/internal/transport/grpc"
+	pb "usdt-rates/proto"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -32,10 +35,21 @@ func main() {
 		}
 	}()
 
+	server := grpc.NewServer()
+
+	// Регистрация обработчиков gRPC
+	pb.RegisterRateServiceServer(server, &myGrpc.RateHandler{})
+	pb.RegisterHealthServer(server, &myGrpc.HealthHandler{})
+
 	// Запуск gRPC сервера
+	listener, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
 	go func() {
-		if err := grpc.StartServer(); err != nil {
-			log.Fatalf("failed to start gRPC server: %v", err)
+		log.Println("Starting gRPC server on port 50051...")
+		if err := server.Serve(listener); err != nil {
+			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
 

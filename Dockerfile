@@ -6,14 +6,14 @@ WORKDIR /app
 
 RUN go mod download && go mod verify
 
-RUN go build  -o ./app ./cmd/service
+RUN go build  -o ./app ./cmd/app
 
 FROM alpine:3.14
 
 RUN mkdir /app
 WORKDIR /app
 
-COPY --from=builder --chown=app:app /app/app .
-COPY --from=builder --chown=app:app /app/db/ db/
+COPY --from=builder /app/app .
+COPY --from=builder /app/db/ db/
 
 CMD ["./app" ]
