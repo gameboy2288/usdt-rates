@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package rate;
-option go_package = "proto;rate";
+option go_package = "/proto;rate";
 
 service RateService {
   rpc GetRates (Empty) returns (RateResponse);
@@ -11,9 +11,17 @@ service RateService {
 message Empty {}
 
 message RateResponse {
-  float ask = 1;
-  float bid = 2;
-  int64 timestamp = 3;
+  int64 timestamp = 1;
+  repeated Ask bids = 2;
+  repeated Ask asks = 3;
+}
+
+message Ask {
+  float price = 1;
+  float volume = 2;
+  float amount = 3;
+  float factor = 4;
+  string type = 5;
 }
 
 message HealthResponse {

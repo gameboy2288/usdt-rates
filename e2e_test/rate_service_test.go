@@ -2,6 +2,7 @@ package e2e_test
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -23,10 +24,11 @@ func TestRateService_GetRate(t *testing.T) {
 	client := pb.NewRateServiceClient(conn)
 
 	// Выполняем запрос
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	resp, err := client.GetRate(ctx, &pb.GetRateRequest{Currency: "USDT"})
+	resp, err := client.GetRates(ctx, &pb.Empty{})
+	fmt.Println(resp)
 	assert.NoError(t, err)
-	assert.Greater(t, resp.Rate, 0.0, "Rate should be greater than 0")
+	assert.Greater(t, float32(resp.Bids[0].Price), float32(0.0), "Rate should be greater than 0")
 }

@@ -15,7 +15,7 @@ func NewRateRepository(db *sql.DB) *RateRepository {
 	return &RateRepository{db: db}
 }
 
-func (r *RateRepository) SaveRate(rate *domain.Rate) error {
-	_, err := r.db.Exec("INSERT INTO rates (ask, bid, timestamp) VALUES ($1, $2, $3)", rate.Ask, rate.Bid, rate.Timestamp)
+func (r *RateRepository) SaveRate(rate *domain.Rates) error {
+	_, err := r.db.Exec("INSERT INTO rates (ask, bid, timestamp) VALUES ($1, $2, $3)", rate.Asks[0].Price, rate.Bids[0].Price, rate.Timestamp)
 	return err
 }
