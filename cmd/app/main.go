@@ -2,15 +2,19 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+	"usdt-rates/internal/repository"
 	myGrpc "usdt-rates/internal/transport/grpc"
 	pb "usdt-rates/proto"
 
+	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -35,10 +39,27 @@ func main() {
 		}
 	}()
 
+	db, err := sql.Open("postgres", "host=postgres port=5432 user=user password=password dbname=usdt_rates sslmode=disable")
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+	err = db.Ping()
+	if err != nil {
+		log.Fatalf("failed to ping database: %v", err)
+	}
+	err = goose.Up(db, "db/migrations")
+	if err != nil {
+		log.Fatalf("failed to run migrations: %v", err)
+	}
+
+	repo := repository.NewRepository(db)
+	rateHandler := myGrpc.NewRateHandler(repo)
+
 	server := grpc.NewServer()
 
 	// Регистрация обработчиков gRPC
-	pb.RegisterRateServiceServer(server, &myGrpc.RateHandler{})
+	pb.RegisterRateServiceServer(server, rateHandler)
 	pb.RegisterHealthServer(server, &myGrpc.HealthHandler{})
 
 	// Запуск gRPC сервера
