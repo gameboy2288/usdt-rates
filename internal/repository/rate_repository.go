@@ -2,20 +2,36 @@ package repository
 
 import (
 	"database/sql"
-	"usdt-rates/internal/domain"
 
-	_ "github.com/lib/pq"
+	"usdt-rates/internal/domain"
 )
 
-type RateRepository struct {
+type Repository struct {
 	db *sql.DB
 }
 
-func NewRateRepository(db *sql.DB) *RateRepository {
-	return &RateRepository{db: db}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{db: db}
 }
 
-func (r *RateRepository) SaveRate(rate *domain.Rates) error {
-	_, err := r.db.Exec("INSERT INTO rates (ask, bid, timestamp) VALUES ($1, $2, $3)", rate.Asks[0].Price, rate.Bids[0].Price, rate.Timestamp)
+func (r *Repository) SaveRate(timestamp int64) (int64, error) {
+	query := `INSERT INTO rates (timestamp) VALUES ($1) RETURNING id`
+	var rateID int64
+	err := r.db.QueryRow(query, timestamp).Scan(&rateID)
+	if err != nil {
+		return 0, err
+	}
+	return rateID, nil
+}
+
+func (r *Repository) SaveAsk(rateID int64, ask domain.Ask) error {
+	query := `INSERT INTO asks (rate_id, price, volume, amount, factor, type) VALUES ($1, $2, $3, $4, $5, $6)`
+	_, err := r.db.Exec(query, rateID, ask.Price, ask.Volume, ask.Amount, ask.Factor, string(ask.Type))
+	return err
+}
+
+func (r *Repository) SaveBid(rateID int64, bid domain.Ask) error {
+	query := `INSERT INTO bids (rate_id, price, volume, amount, factor, type) VALUES ($1, $2, $3, $4, $5, $6)`
+	_, err := r.db.Exec(query, rateID, bid.Price, bid.Volume, bid.Amount, bid.Factor, string(bid.Type))
 	return err
 }

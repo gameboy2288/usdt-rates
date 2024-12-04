@@ -4,11 +4,14 @@ import (
 	"context"
 	"strconv"
 	"usdt-rates/internal/domain"
+	"usdt-rates/internal/repository"
 	"usdt-rates/internal/service"
 	pb "usdt-rates/proto"
 )
 
 type RateHandler struct {
+	repo *repository.Repository
+
 	pb.UnimplementedRateServiceServer
 }
 
@@ -18,6 +21,21 @@ func NewRateHandler() *RateHandler {
 
 func (h *RateHandler) GetRates(ctx context.Context, req *pb.Empty) (*pb.RateResponse, error) {
 	rate, err := service.FetchRates()
+	if err != nil {
+		return nil, err
+	}
+
+	rateID, err := h.repo.SaveRate(rate.Timestamp)
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.repo.SaveAsk(rateID, rate.Asks[0])
+	if err != nil {
+		return nil, err
+	}
+
+	err = h.repo.SaveBid(rateID, rate.Bids[0])
 	if err != nil {
 		return nil, err
 	}
