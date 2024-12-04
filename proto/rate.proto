@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package rate;
+
+service RateService {
+  rpc GetRates (Empty) returns (RateResponse);
+  rpc HealthCheck (Empty) returns (HealthResponse);
+}
+
+message Empty {}
+
+message RateResponse {
+  float ask = 1;
+  float bid = 2;
+  int64 timestamp = 3;
+}
+
+message HealthResponse {
+  bool status = 1;
+}

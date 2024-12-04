@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: usdt_rates
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    ports:
+      - "50051:50051"
+    environment:
+      DATABASE_URL: postgres://user:password@postgres:5432/usdt_rates?sslmode=disable
+    depends_on:
+      - postgres
