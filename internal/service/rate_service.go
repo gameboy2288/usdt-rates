@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"usdt-rates/internal/domain"
 )
 
 func FetchRates() (*domain.Rate, error) {

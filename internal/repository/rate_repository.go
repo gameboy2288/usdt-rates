@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"usdt-rates/internal/service"
+	"usdt-rates/internal/domain"
 
 	_ "github.com/lib/pq"
 )
@@ -15,7 +15,7 @@ func NewRateRepository(db *sql.DB) *RateRepository {
 	return &RateRepository{db: db}
 }
 
-func (r *RateRepository) SaveRate(rate *service.Rate) error {
+func (r *RateRepository) SaveRate(rate *domain.Rate) error {
 	_, err := r.db.Exec("INSERT INTO rates (ask, bid, timestamp) VALUES ($1, $2, $3)", rate.Ask, rate.Bid, rate.Timestamp)
 	return err
 }
