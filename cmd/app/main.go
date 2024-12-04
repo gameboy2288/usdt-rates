@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+	"usdt-rates/internal/config"
 	"usdt-rates/internal/repository"
 	myGrpc "usdt-rates/internal/transport/grpc"
 	pb "usdt-rates/proto"
@@ -39,7 +41,16 @@ func main() {
 		}
 	}()
 
-	db, err := sql.Open("postgres", "host=postgres port=5432 user=user password=password dbname=usdt_rates sslmode=disable")
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	db, err := sql.Open("postgres", fmt.Sprintf("host=postgres port=%s user=%s password=%s dbname=%s sslmode=disable",
+		cfg.Db_port,
+		cfg.Db_user,
+		cfg.Db_password,
+		cfg.Db_name))
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
