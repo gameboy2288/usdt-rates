@@ -32,7 +32,11 @@ func main() {
 
 	metrics.InitMetrics()
 
-	go metrics.StartMetricsServer()
+	go func() {
+		if err := metrics.StartMetricsServer(); err != nil {
+			logger.Log.Fatal("failed to start metrics server: ", zap.Error(err))
+		}
+	}()
 
 	ctx := context.Background()
 

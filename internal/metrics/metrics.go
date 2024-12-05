@@ -25,7 +25,7 @@ func RecordRequest(status string) {
 	rateRequests.WithLabelValues(status).Inc()
 }
 
-func StartMetricsServer() {
+func StartMetricsServer() error {
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":9090", nil) // Запускаем сервер метрик на 8080 порту
+	return http.ListenAndServe(":9090", nil) // Запускаем сервер метрик на 9090 порту
 }
