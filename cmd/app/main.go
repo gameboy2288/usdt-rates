@@ -29,6 +29,7 @@ import (
 )
 
 func main() {
+	logger.InitLogger()
 	ctx := context.Background()
 
 	// Инициализация OpenTelemetry
