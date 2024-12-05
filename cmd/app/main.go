@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,6 +20,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -90,6 +92,8 @@ func main() {
 		}
 	}()
 
+	startPrometheusMetrics()
+
 	// Обработка Graceful Shutdown
 	gracefulShutdown(ctx, tp)
 }
@@ -108,4 +112,15 @@ func gracefulShutdown(ctx context.Context, tp *trace.TracerProvider) {
 	if err := tp.Shutdown(ctx); err != nil {
 		log.Printf("Error shutting down tracer provider: %v", err)
 	}
+}
+
+func startPrometheusMetrics() {
+	http.Handle("/metrics", promhttp.Handler())
+
+	go func() {
+		log.Println("Starting Prometheus metrics server on port 9090...")
+		if err := http.ListenAndServe(":9090", nil); err != nil {
+			log.Fatalf("failed to start Prometheus metrics server: %v", err)
+		}
+	}()
 }
