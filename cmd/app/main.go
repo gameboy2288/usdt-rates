@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -12,11 +11,13 @@ import (
 	"syscall"
 	"time"
 	"usdt-rates/internal/config"
+	"usdt-rates/internal/logger"
 	"usdt-rates/internal/repository"
 	myGrpc "usdt-rates/internal/transport/grpc"
 	pb "usdt-rates/proto"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.uber.org/zap"
 
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
@@ -33,7 +34,7 @@ func main() {
 	// Инициализация OpenTelemetry
 	exp, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 	if err != nil {
-		log.Fatalf("failed to initialize exporter: %v", err)
+		logger.Log.Fatal("failed to initialize exporter: ", zap.Error(err))
 	}
 
 	tp := trace.NewTracerProvider(trace.WithBatcher(exp))
@@ -41,13 +42,13 @@ func main() {
 
 	defer func() {
 		if err := tp.Shutdown(ctx); err != nil {
-			log.Fatalf("failed to shutdown TracerProvider: %v", err)
+			logger.Log.Fatal("failed to shutdown TracerProvider: ", zap.Error(err))
 		}
 	}()
 
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		logger.Log.Fatal("failed to load config: ", zap.Error(err))
 	}
 
 	db, err := sql.Open("postgres", fmt.Sprintf("host=postgres port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -56,16 +57,16 @@ func main() {
 		cfg.DbPassword,
 		cfg.DbName))
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		logger.Log.Fatal("failed to connect to database: ", zap.Error(err))
 	}
 	defer db.Close()
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("failed to ping database: %v", err)
+		logger.Log.Fatal("failed to ping database: ", zap.Error(err))
 	}
 	err = goose.Up(db, "db/migrations")
 	if err != nil {
-		log.Fatalf("failed to run migrations: %v", err)
+		logger.Log.Fatal("failed to run migrations: ", zap.Error(err))
 	}
 
 	repo := repository.NewRepository(db)
@@ -83,12 +84,12 @@ func main() {
 	// Запуск gRPC сервера
 	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		logger.Log.Fatal("failed to listen: ", zap.Error(err))
 	}
 	go func() {
-		log.Println("Starting gRPC server on port 50051...")
+		logger.Log.Info("Starting gRPC server on port 50051...")
 		if err := server.Serve(listener); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+			logger.Log.Fatal("failed to serve: ", zap.Error(err))
 		}
 	}()
 
@@ -103,14 +104,14 @@ func gracefulShutdown(ctx context.Context, tp *trace.TracerProvider) {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Shutting down...")
+	logger.Log.Info("Shutting down...")
 
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	// Остановка провайдера трассировки
 	if err := tp.Shutdown(ctx); err != nil {
-		log.Printf("Error shutting down tracer provider: %v", err)
+		logger.Log.Info("Error shutting down tracer provider: ", zap.Error(err))
 	}
 }
 
@@ -118,9 +119,9 @@ func startPrometheusMetrics() {
 	http.Handle("/metrics", promhttp.Handler())
 
 	go func() {
-		log.Println("Starting Prometheus metrics server on port 9090...")
+		logger.Log.Info("Starting Prometheus metrics server on port 9090...")
 		if err := http.ListenAndServe(":9090", nil); err != nil {
-			log.Fatalf("failed to start Prometheus metrics server: %v", err)
+			logger.Log.Fatal("failed to start Prometheus metrics server: ", zap.Error(err))
 		}
 	}()
 }
