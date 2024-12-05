@@ -47,10 +47,10 @@ func main() {
 	}
 
 	db, err := sql.Open("postgres", fmt.Sprintf("host=postgres port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.Db_port,
-		cfg.Db_user,
-		cfg.Db_password,
-		cfg.Db_name))
+		cfg.DbPort,
+		cfg.DbUser,
+		cfg.DbPassword,
+		cfg.DbName))
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
