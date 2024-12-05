@@ -15,6 +15,8 @@ import (
 	myGrpc "usdt-rates/internal/transport/grpc"
 	pb "usdt-rates/proto"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"go.opentelemetry.io/otel"
@@ -67,7 +69,10 @@ func main() {
 	repo := repository.NewRepository(db)
 	rateHandler := myGrpc.NewRateHandler(repo)
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+	)
 
 	// Регистрация обработчиков gRPC
 	pb.RegisterRateServiceServer(server, rateHandler)
