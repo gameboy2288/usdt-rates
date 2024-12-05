@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"usdt-rates/internal/domain"
+	"usdt-rates/internal/metrics"
 	"usdt-rates/internal/repository"
 	"usdt-rates/internal/service"
 	pb "usdt-rates/proto"
@@ -24,33 +25,39 @@ func NewRateHandler(repo *repository.Repository) *RateHandler {
 func (h *RateHandler) GetRates(ctx context.Context, req *pb.Empty) (*pb.RateResponse, error) {
 	rate, err := service.FetchRates()
 	if err != nil {
+		metrics.RecordRequest("500")
 		return nil, err
 	}
 
 	rateID, err := h.repo.SaveRate(rate.Timestamp)
 	if err != nil {
+		metrics.RecordRequest("500")
 		return nil, err
 	}
 
 	err = h.repo.SaveAsk(rateID, rate.Asks[0])
 	if err != nil {
+		metrics.RecordRequest("500")
 		return nil, err
 	}
 
 	err = h.repo.SaveBid(rateID, rate.Bids[0])
 	if err != nil {
+		metrics.RecordRequest("500")
 		return nil, err
 	}
 
 	convertedAsks, err := convertAskToPb(rate.Asks)
 	if err != nil {
+		metrics.RecordRequest("500")
 		return nil, err
 	}
 	convertedBids, err := convertAskToPb(rate.Bids)
 	if err != nil {
+		metrics.RecordRequest("500")
 		return nil, err
 	}
-
+	metrics.RecordRequest("200")
 	return &pb.RateResponse{
 		Timestamp: rate.Timestamp,
 		Asks:      convertedAsks,

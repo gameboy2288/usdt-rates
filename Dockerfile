@@ -13,6 +13,7 @@ FROM alpine:3.14
 RUN mkdir /app
 WORKDIR /app
 
+EXPOSE 9090
 COPY .env .
 COPY --from=builder /app/app .
 COPY --from=builder /app/db/ db/

@@ -18,6 +18,7 @@ services:
   app:
     build: .
     ports:
+      - "9090:9090"
       - "50051:50051"
     environment:
       DB_HOST: ${DB_HOST}

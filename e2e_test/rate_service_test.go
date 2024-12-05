@@ -30,5 +30,5 @@ func TestRateService_GetRate(t *testing.T) {
 	resp, err := client.GetRates(ctx, &pb.Empty{})
 	fmt.Println(resp)
 	assert.NoError(t, err)
-	assert.Greater(t, resp.Bids[0].Price, float32(0.0), "Rate should be greater than 0")
+	assert.Greater(t, resp.Bids[3].Price, float32(0.0), "Rate should be greater than 0")
 }
