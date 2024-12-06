@@ -18,7 +18,7 @@ func TestRateHandler_GetRates_Success(t *testing.T) {
 	// Подготовка
 	ctx := context.Background()
 
-	mockRepo := new(mocks.Repository)
+	mockRepo := new(mocks.RepositoryInterface)
 	mockRepo.On("FetchRates", mock.Anything).Return([]repository.Rate{
 		{Timestamp: 1234567890, Price: "100.0", Volume: "10.0"},
 	}, nil)
