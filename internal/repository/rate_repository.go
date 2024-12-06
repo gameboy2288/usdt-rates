@@ -6,6 +6,12 @@ import (
 	"usdt-rates/internal/domain"
 )
 
+type RepositoryInterface interface {
+	SaveRate(timestamp int64) (int64, error)
+	SaveAsk(rateID int64, ask domain.Ask) error
+	SaveBid(rateID int64, bid domain.Ask) error
+}
+
 type Repository struct {
 	db *sql.DB
 }
