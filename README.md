@@ -39,20 +39,28 @@
 
 ### 1. Клонирование репозитория
 
+```bash
 git clone <url-репозитория>
 cd <папка-репозитория>
+```
 
 ### 2. Сборка приложения
 
+```bash
 make build
+```
 
 ### 3. Запуск через Docker Compose
 
+```bash
 docker-compose up -d
+```
 
 ### 4. Запуск сервиса
 
+```bash
 docker-compose run --rm app ./app
+```
 
 ---
 
@@ -76,7 +84,7 @@ docker-compose run --rm app ./app
 
 POSTGRES_HOST       - Хост PostgreSQL (по умолчанию: localhost)  
 POSTGRES_PORT       - Порт PostgreSQL (по умолчанию: 5432)  
-POSTGRES_USER       - Пользователь PostgreSQL (по умолчанию: postgres)  
+POSTGRES_USER       - Пользователь PostgreSQL (по умолчанию: user)  
 POSTGRES_PASSWORD   - Пароль PostgreSQL (по умолчанию: password)  
 POSTGRES_DB         - Имя базы данных PostgreSQL (по умолчанию: usdt_rates)  
 GRPC_PORT           - Порт gRPC-сервера (по умолчанию: 50051)  
@@ -106,7 +114,9 @@ make lint — Запуск линтера GolangCI-Lint
 
 Запуск unit-тестов выполняется с помощью команды:
 
+```bash
 make test
+```
 
 ---
 
