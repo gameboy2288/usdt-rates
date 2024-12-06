@@ -11,12 +11,12 @@ import (
 )
 
 type RateHandler struct {
-	repo *repository.Repository
+	repo repository.RepositoryInterface
 
 	pb.UnimplementedRateServiceServer
 }
 
-func NewRateHandler(repo *repository.Repository) *RateHandler {
+func NewRateHandler(repo repository.RepositoryInterface) *RateHandler {
 	return &RateHandler{
 		repo: repo,
 	}

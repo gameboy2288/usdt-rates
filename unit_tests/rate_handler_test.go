@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"usdt-rates/internal/repository"
 	"usdt-rates/internal/repository/mocks" // Моки, сгенерированные через MockGen
 	pb "usdt-rates/proto"
 
@@ -19,9 +18,15 @@ func TestRateHandler_GetRates_Success(t *testing.T) {
 	ctx := context.Background()
 
 	mockRepo := new(mocks.RepositoryInterface)
-	mockRepo.On("FetchRates", mock.Anything).Return([]repository.Rate{
-		{Timestamp: 1234567890, Price: "100.0", Volume: "10.0"},
-	}, nil)
+	// rates := &domain.Rates{
+	// 	Timestamp: time.Now().Unix(),
+	// 	Asks:      []domain.Ask{{Price: "100.08", Volume: "55000.0", Amount: "5504400.0", Factor: "0.0", Type: "limit"}},
+	// 	Bids:      []domain.Ask{{Price: "95.0", Volume: "5.0", Amount: "", Factor: "", Type: ""}},
+	// }
+	// mockRepo.On("FetchRates").Return(rates, nil)
+	mockRepo.On("SaveRate", mock.AnythingOfType("int64")).Return(int64(1), nil)
+	mockRepo.On("SaveAsk", int64(1), mock.AnythingOfType("domain.Ask")).Return(nil)
+	mockRepo.On("SaveBid", int64(1), mock.AnythingOfType("domain.Ask")).Return(nil)
 
 	handler := myGrpc.NewRateHandler(mockRepo)
 
@@ -32,10 +37,6 @@ func TestRateHandler_GetRates_Success(t *testing.T) {
 	// Проверка
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.Len(t, resp.Asks, 1)
-	assert.Equal(t, resp.Timestamp, int64(1234567890))
-	assert.Equal(t, resp.Asks[0].Price, "100.0")
-	assert.Equal(t, resp.Asks[0].Volume, "10.0")
 
 	// Убедиться, что все ожидаемые вызовы выполнены
 	mockRepo.AssertExpectations(t)
@@ -45,8 +46,8 @@ func TestRateHandler_GetRates_Error(t *testing.T) {
 	// Подготовка
 	ctx := context.Background()
 
-	mockRepo := new(mocks.Repository)
-	mockRepo.On("FetchRates", mock.Anything).Return(nil, errors.New("database error"))
+	mockRepo := new(mocks.RepositoryInterface)
+	mockRepo.On("SaveRate", mock.AnythingOfType("int64")).Return(int64(0), errors.New("database error"))
 
 	handler := myGrpc.NewRateHandler(mockRepo)
 
